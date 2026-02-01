@@ -1,0 +1,158 @@
+/* Custom Tagify Styles for NMC Competency Selector */
+
+/* Note: This file is included for potential future Tagify integration.
+   Currently, the component uses a custom React-based tag display. */
+
+.tagify {
+  --tag-bg: hsl(var(--secondary));
+  --tag-hover: hsl(var(--secondary) / 0.8);
+  --tag-text-color: hsl(var(--secondary-foreground));
+  --tag-text-color--edit: hsl(var(--secondary-foreground));
+  --tag-pad: 0.375rem 0.75rem;
+  --tag-inset-shadow-size: 1rem;
+  --tag-remove-bg: hsl(var(--muted));
+  --tag-remove-btn-color: hsl(var(--muted-foreground));
+  --tag-remove-btn-bg: transparent;
+  --tag-remove-btn-bg--hover: hsl(var(--destructive) / 0.1);
+  --tags-border-color: hsl(var(--border));
+  --tags-focus-border-color: hsl(var(--ring));
+  --placeholder-color: hsl(var(--muted-foreground));
+  --input-color: hsl(var(--foreground));
+
+  border-radius: 0.5rem;
+  border-color: var(--tags-border-color);
+  padding: 0.25rem;
+  min-height: 2.5rem;
+}
+
+.tagify:focus-within {
+  border-color: var(--tags-focus-border-color);
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+}
+
+.tagify__tag {
+  border-radius: 0.375rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0.125rem;
+}
+
+.tagify__tag > div {
+  padding: var(--tag-pad);
+}
+
+.tagify__tag__removeBtn {
+  border-radius: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+.tagify__tag__removeBtn:hover {
+  background: var(--tag-remove-btn-bg--hover);
+}
+
+/* Core competency tag styling */
+.tagify__tag[data-core="true"] {
+  --tag-bg: hsl(var(--primary) / 0.1);
+  border: 1px solid hsl(var(--primary) / 0.5);
+}
+
+.tagify__tag[data-core="true"] > div::before {
+  content: "★";
+  margin-right: 0.25rem;
+  color: hsl(var(--primary));
+}
+
+/* Tag text styling */
+.tagify__tag-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+
+/* Dropdown styling */
+.tagify__dropdown {
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--popover));
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.tagify__dropdown__wrapper {
+  border-radius: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tagify__dropdown__item {
+  padding: 0.75rem 1rem;
+  border-radius: 0;
+  margin: 0;
+}
+
+.tagify__dropdown__item:hover,
+.tagify__dropdown__item--active {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+/* Read-only mode */
+.tagify[readonly] .tagify__tag__removeBtn {
+  display: none;
+}
+
+.tagify[readonly] {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Dark mode adjustments */
+.dark .tagify {
+  --tag-bg: hsl(var(--secondary));
+  --tag-text-color: hsl(var(--secondary-foreground));
+}
+
+.dark .tagify__dropdown {
+  background: hsl(var(--popover));
+  border-color: hsl(var(--border));
+}
+
+/* Placeholder styling */
+.tagify::placeholder,
+.tagify__input::before {
+  color: var(--placeholder-color);
+  font-size: 0.875rem;
+}
+
+/* Loading state */
+.tagify--loading::after {
+  content: "";
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid hsl(var(--primary));
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: tagify-spin 0.6s linear infinite;
+}
+
+@keyframes tagify-spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .tagify__tag-text {
+    max-width: 100px;
+  }
+
+  .tagify__tag {
+    font-size: 0.75rem;
+  }
+}
