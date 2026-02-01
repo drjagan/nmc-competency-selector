@@ -74,7 +74,7 @@ export default function Home() {
 
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>
-            Built for medical education at Sri Balaji Vidyapeeth
+            Built for Medical Education by Academe CBME
           </p>
         </div>
       </div>

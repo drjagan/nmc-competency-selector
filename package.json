@@ -1,5 +1,5 @@
 {
-  "name": "@sbv/nmc-competency-selector",
+  "name": "@academe/nmc-competency-selector",
   "version": "1.0.0",
   "description": "Standalone React component for selecting NMC medical competencies",
   "main": "dist/index.js",
@@ -43,11 +43,11 @@
     "india",
     "curriculum"
   ],
-  "author": "Sri Balaji Vidyapeeth",
+  "author": "Academe CBME",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sbv/nmc-competency-selector.git"
+    "url": "https://github.com/drjagan/nmc-competency-selector.git"
   },
   "peerDependencies": {
     "react": "^18.0.0",

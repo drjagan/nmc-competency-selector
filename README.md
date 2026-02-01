@@ -4,9 +4,11 @@ A standalone React component library for selecting medical competencies from Ind
 
 ## Features
 
-- **Fast Full-Text Search**: FTS5-powered search across ~5,000 competencies (<100ms)
-- **Browse Interface**: Cascading Subject -> Topic -> Competency navigation
-- **Tag Display**: Rich tooltips showing full competency details
+- **Fast Full-Text Search**: FTS5-powered search across ~3,000 competencies (<100ms)
+- **Browse Interface**: Cascading Subject → Topic → Competency navigation
+- **Search Button & Enter Key**: Submit search explicitly or auto-search while typing
+- **Persistent Results**: Search results stay visible for easy multi-select
+- **Tag Display**: Selected competencies shown as removable tags
 - **Admin Interface**: CRUD operations with bulk import/export
 - **SQLite Database**: Offline-capable with embedded database
 - **Dark Mode**: Full dark mode support via shadcn/ui
@@ -14,15 +16,15 @@ A standalone React component library for selecting medical competencies from Ind
 ## Installation
 
 ```bash
-npm install @sbv/nmc-competency-selector
+npm install @academe/nmc-competency-selector
 ```
 
 ## Quick Start
 
 ```tsx
-import { CompetencySelector } from "@sbv/nmc-competency-selector";
+import { CompetencySelector } from "@academe/nmc-competency-selector";
 import { useState } from "react";
-import type { CompetencyTag } from "@sbv/nmc-competency-selector";
+import type { CompetencyTag } from "@academe/nmc-competency-selector";
 
 function App() {
   const [selected, setSelected] = useState<CompetencyTag[]>([]);
@@ -106,6 +108,21 @@ The component uses SQLite with the following structure:
 - **competencies**: Individual competency entries
 - **competencies_fts**: FTS5 virtual table for search
 
+## Changelog
+
+### v1.0.0
+- Initial release
+- Full-text search with FTS5
+- Browse interface with cascading dropdowns
+- Search button and Enter key support
+- Persistent search results for multi-select
+- Admin interface for CRUD operations
+- SQLite database with ~3,000 NMC competencies
+
 ## License
 
-MIT License - Sri Balaji Vidyapeeth
+MIT License - Academe CBME
+
+---
+
+Built for Medical Education by [Academe CBME](https://academe.co.in)
