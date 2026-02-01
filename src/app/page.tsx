@@ -59,7 +59,7 @@ export default function Home() {
                         <span>Domain: {comp.domain}</span>
                       </>
                     )}
-                    {comp.level && (
+                    {comp.level && !['true', 'false', ''].includes(comp.level) && (
                       <>
                         <span>|</span>
                         <span>Level: {comp.level}</span>
