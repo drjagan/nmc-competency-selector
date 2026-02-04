@@ -9,6 +9,7 @@ import type {
   CompetencyInput,
   PaginatedResult,
 } from "@/types";
+import type { TreeSubjectData, TreeTopicData } from "@/types/tree";
 
 export class CompetencyService {
   private db = getDatabase();
@@ -444,6 +445,50 @@ export class CompetencyService {
 
     const result = this.db.prepare(sql).get(...params) as { count: number };
     return result.count;
+  }
+
+  /**
+   * Get subjects with topic and competency counts for tree view
+   */
+  getSubjectsWithCounts(): TreeSubjectData[] {
+    return this.db
+      .prepare(
+        `
+        SELECT
+          s.id,
+          s.code,
+          s.name,
+          COUNT(DISTINCT t.id) as topicCount,
+          COUNT(c.id) as competencyCount
+        FROM subjects s
+        LEFT JOIN topics t ON t.subject_id = s.id
+        LEFT JOIN competencies c ON c.topic_id = t.id AND c.deleted_at IS NULL
+        GROUP BY s.id
+        ORDER BY s.display_order, s.name
+      `
+      )
+      .all() as TreeSubjectData[];
+  }
+
+  /**
+   * Get topics with competency counts for a subject
+   */
+  getTopicsWithCounts(subjectId: number): TreeTopicData[] {
+    return this.db
+      .prepare(
+        `
+        SELECT
+          t.id,
+          t.name,
+          COUNT(c.id) as competencyCount
+        FROM topics t
+        LEFT JOIN competencies c ON c.topic_id = t.id AND c.deleted_at IS NULL
+        WHERE t.subject_id = ?
+        GROUP BY t.id
+        ORDER BY t.display_order, t.name
+      `
+      )
+      .all(subjectId) as TreeTopicData[];
   }
 
   /**

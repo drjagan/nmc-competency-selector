@@ -57,3 +57,60 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Tree Graph Animations */
+@layer components {
+  .tree-node {
+    transition: transform 0.2s ease, opacity 0.3s ease;
+  }
+
+  .tree-node:hover {
+    transform: scale(1.02);
+  }
+
+  .tree-node circle {
+    transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease;
+  }
+
+  .tree-link {
+    transition: opacity 0.3s ease, stroke-opacity 0.3s ease;
+  }
+
+  /* Loading spinner animation */
+  .tree-node .animate-spin {
+    animation: tree-spin 1.5s linear infinite;
+    transform-origin: center center;
+  }
+
+  @keyframes tree-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Fade in animation for new nodes */
+  .tree-node-enter {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  .tree-node-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  /* Link animation */
+  .tree-link-enter {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
+
+  .tree-link-enter-active {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.5s ease;
+  }
+}

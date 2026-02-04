@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchInterface } from "./search/SearchInterface";
 import { BrowseInterface } from "./browse/BrowseInterface";
+import { TreeGraphViewer } from "./tree/TreeGraphViewer";
 import { TagDisplay } from "./tags/TagDisplay";
 import { useTagManagement } from "@/hooks/useTagManagement";
 import type {
@@ -22,7 +23,7 @@ export function CompetencySelector({
   readOnly = false,
   className,
 }: CompetencySelectorProps) {
-  const [activeTab, setActiveTab] = useState<"search" | "browse">("search");
+  const [activeTab, setActiveTab] = useState<"search" | "browse" | "tree">("search");
 
   const {
     tags,
@@ -68,11 +69,12 @@ export function CompetencySelector({
       {!readOnly && (
         <Tabs
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as "search" | "browse")}
+          onValueChange={(v) => setActiveTab(v as "search" | "browse" | "tree")}
         >
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="search">Search</TabsTrigger>
             <TabsTrigger value="browse">Browse</TabsTrigger>
+            <TabsTrigger value="tree">Tree View</TabsTrigger>
           </TabsList>
 
           <TabsContent value="search" className="mt-4">
@@ -89,6 +91,15 @@ export function CompetencySelector({
               filters={filters}
               onSelect={handleTagSelect}
               selectedCodes={selectedCodes}
+            />
+          </TabsContent>
+
+          <TabsContent value="tree" className="mt-4">
+            <TreeGraphViewer
+              filters={filters}
+              onSelect={handleTagSelect}
+              selectedCodes={selectedCodes}
+              height={500}
             />
           </TabsContent>
         </Tabs>
