@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { competencyService } from "@/services/competencyService";
+import { getCompetencyService } from "@/services/competencyService";
 
 export async function GET(
   request: Request,
@@ -7,6 +7,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const version = searchParams.get("version") || undefined;
+
     const subjectId = parseInt(id);
 
     if (isNaN(subjectId)) {
@@ -16,7 +19,8 @@ export async function GET(
       );
     }
 
-    const topics = competencyService.getTopicsBySubject(subjectId);
+    const service = getCompetencyService(version);
+    const topics = service.getTopicsBySubject(subjectId);
     return NextResponse.json(topics);
   } catch (error) {
     console.error("Error fetching topics:", error);

@@ -121,17 +121,28 @@ function treeReducer(state: TreeState, action: TreeAction): TreeState {
 interface UseTreeGraphOptions {
   selectedCodes?: string[];
   onSelect?: (tag: CompetencyTag) => void;
+  version?: string;
 }
 
 export function useTreeGraph(options: UseTreeGraphOptions = {}) {
-  const { selectedCodes = [], onSelect } = options;
+  const { selectedCodes = [], onSelect, version } = options;
+
+  // Build URL with optional version parameter
+  const buildUrl = useCallback(
+    (baseUrl: string) => {
+      if (!version) return baseUrl;
+      const separator = baseUrl.includes("?") ? "&" : "?";
+      return `${baseUrl}${separator}version=${version}`;
+    },
+    [version]
+  );
   const [state, dispatch] = useReducer(treeReducer, initialState);
 
-  // Load initial subjects on mount
+  // Load initial subjects on mount or when version changes
   useEffect(() => {
     async function loadSubjects() {
       try {
-        const response = await fetch("/api/tree");
+        const response = await fetch(buildUrl("/api/tree"));
         const data = await response.json();
 
         const subjectNodes: TreeNode[] = data.subjects.map(
@@ -164,13 +175,13 @@ export function useTreeGraph(options: UseTreeGraphOptions = {}) {
     }
 
     loadSubjects();
-  }, []);
+  }, [buildUrl]);
 
   const loadTopics = useCallback(async (subjectId: number, nodeId: string) => {
     dispatch({ type: "SET_LOADING", nodeId, loading: true });
 
     try {
-      const response = await fetch(`/api/tree/subjects/${subjectId}`);
+      const response = await fetch(buildUrl(`/api/tree/subjects/${subjectId}`));
       const data = await response.json();
 
       const topicNodes: TreeNode[] = data.topics.map((topic: TreeTopicData) => ({
@@ -189,13 +200,13 @@ export function useTreeGraph(options: UseTreeGraphOptions = {}) {
       console.error("Failed to load topics:", error);
       dispatch({ type: "SET_LOADING", nodeId, loading: false });
     }
-  }, []);
+  }, [buildUrl]);
 
   const loadCompetencies = useCallback(async (topicId: number, nodeId: string) => {
     dispatch({ type: "SET_LOADING", nodeId, loading: true });
 
     try {
-      const response = await fetch(`/api/topics/${topicId}/competencies`);
+      const response = await fetch(buildUrl(`/api/topics/${topicId}/competencies`));
       const competencies: CompetencyWithDetails[] = await response.json();
 
       const competencyNodes: TreeNode[] = competencies.map((comp) => ({
@@ -213,7 +224,7 @@ export function useTreeGraph(options: UseTreeGraphOptions = {}) {
       console.error("Failed to load competencies:", error);
       dispatch({ type: "SET_LOADING", nodeId, loading: false });
     }
-  }, []);
+  }, [buildUrl]);
 
   const toggleNode = useCallback(
     async (nodeId: string) => {

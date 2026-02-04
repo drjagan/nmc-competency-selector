@@ -14,6 +14,7 @@ interface TreeGraphViewerProps {
   filters?: CompetencyFilters;
   height?: number;
   className?: string;
+  version?: string;
 }
 
 export function TreeGraphViewer({
@@ -22,6 +23,7 @@ export function TreeGraphViewer({
   filters,
   height = 500,
   className,
+  version,
 }: TreeGraphViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height });
@@ -37,6 +39,7 @@ export function TreeGraphViewer({
   } = useTreeGraph({
     selectedCodes,
     onSelect,
+    version,
   });
 
   // Responsive container sizing

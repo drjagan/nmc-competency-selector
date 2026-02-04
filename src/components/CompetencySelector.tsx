@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchInterface } from "./search/SearchInterface";
 import { BrowseInterface } from "./browse/BrowseInterface";
 import { TreeGraphViewer } from "./tree/TreeGraphViewer";
 import { TagDisplay } from "./tags/TagDisplay";
+import { VersionSelector } from "./version/VersionSelector";
 import { useTagManagement } from "@/hooks/useTagManagement";
 import type {
   CompetencySelectorProps,
@@ -22,8 +23,11 @@ export function CompetencySelector({
   maxTags,
   readOnly = false,
   className,
+  version: initialVersion,
+  onVersionChange,
 }: CompetencySelectorProps) {
   const [activeTab, setActiveTab] = useState<"search" | "browse" | "tree">("search");
+  const [version, setVersion] = useState<string>(initialVersion || "");
 
   const {
     tags,
@@ -38,6 +42,25 @@ export function CompetencySelector({
   });
 
   const selectedCodes = tags.map((tag) => tag.code);
+
+  // Handle version change - clear selections when version changes
+  const handleVersionChange = useCallback(
+    (newVersion: string) => {
+      if (newVersion !== version) {
+        setVersion(newVersion);
+        clearTags(); // Clear selections when version changes
+        onVersionChange?.(newVersion);
+      }
+    },
+    [version, clearTags, onVersionChange]
+  );
+
+  // Sync with external version prop
+  useEffect(() => {
+    if (initialVersion && initialVersion !== version) {
+      setVersion(initialVersion);
+    }
+  }, [initialVersion, version]);
 
   const handleTagSelect = useCallback(
     (tag: CompetencyTag) => {
@@ -55,6 +78,15 @@ export function CompetencySelector({
 
   return (
     <div className={cn("space-y-4", className)}>
+      {/* Version Selector - automatically hidden when only one version active */}
+      {!readOnly && (
+        <VersionSelector
+          value={version}
+          onChange={handleVersionChange}
+          disabled={readOnly}
+        />
+      )}
+
       {/* Tag Display */}
       {tags.length > 0 && (
         <TagDisplay
@@ -83,6 +115,7 @@ export function CompetencySelector({
               onSelect={handleTagSelect}
               selectedCodes={selectedCodes}
               placeholder={placeholder}
+              version={version}
             />
           </TabsContent>
 
@@ -91,6 +124,7 @@ export function CompetencySelector({
               filters={filters}
               onSelect={handleTagSelect}
               selectedCodes={selectedCodes}
+              version={version}
             />
           </TabsContent>
 
@@ -100,6 +134,7 @@ export function CompetencySelector({
               onSelect={handleTagSelect}
               selectedCodes={selectedCodes}
               height={500}
+              version={version}
             />
           </TabsContent>
         </Tabs>

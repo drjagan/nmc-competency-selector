@@ -66,6 +66,10 @@ export interface CompetencySelectorProps {
   maxTags?: number;
   className?: string;
   maxHeight?: number;
+  // Version support
+  version?: string;
+  showVersionSelector?: boolean;
+  onVersionChange?: (version: string) => void;
 }
 
 // Search result
@@ -152,4 +156,21 @@ export interface PaginatedResult<T> {
 export interface SelectOption {
   value: string;
   label: string;
+}
+
+// Curriculum version types
+export interface CurriculumVersion {
+  id: string;
+  name: string;
+  dbFile: string;
+  isDefault: boolean;
+  isActive: boolean;
+  releasedAt: string;
+  competencyCount: number | null;
+  description: string;
+}
+
+export interface VersionsConfig {
+  versions: CurriculumVersion[];
+  defaultVersion: string;
 }

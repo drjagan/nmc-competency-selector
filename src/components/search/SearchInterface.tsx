@@ -15,6 +15,7 @@ interface SearchInterfaceProps {
   selectedCodes?: string[];
   className?: string;
   placeholder?: string;
+  version?: string;
 }
 
 export function SearchInterface({
@@ -23,6 +24,7 @@ export function SearchInterface({
   selectedCodes = [],
   className,
   placeholder = "Search competencies...",
+  version,
 }: SearchInterfaceProps) {
   const [inputValue, setInputValue] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -30,6 +32,7 @@ export function SearchInterface({
 
   const { groupedResults, isLoading, error, search, clear } = useCompetencySearch({
     filters,
+    version,
   });
 
   const handleInputChange = (value: string) => {

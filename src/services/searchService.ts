@@ -2,7 +2,15 @@ import { getDatabase } from "./database";
 import type { CompetencyWithDetails, CompetencyFilters, GroupedSearchResults, Subject } from "@/types";
 
 export class SearchService {
-  private db = getDatabase();
+  private version?: string;
+
+  constructor(version?: string) {
+    this.version = version;
+  }
+
+  private get db() {
+    return getDatabase(this.version);
+  }
 
   /**
    * Search competencies using FTS5
@@ -170,5 +178,13 @@ export class SearchService {
   }
 }
 
-// Export singleton
+/**
+ * Factory function to get a version-aware search service
+ * @param version - Curriculum version (e.g., "2019", "2024")
+ */
+export function getSearchService(version?: string): SearchService {
+  return new SearchService(version);
+}
+
+// Default singleton for backward compatibility
 export const searchService = new SearchService();

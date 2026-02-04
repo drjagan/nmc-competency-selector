@@ -12,7 +12,15 @@ import type {
 import type { TreeSubjectData, TreeTopicData } from "@/types/tree";
 
 export class CompetencyService {
-  private db = getDatabase();
+  private version?: string;
+
+  constructor(version?: string) {
+    this.version = version;
+  }
+
+  private get db() {
+    return getDatabase(this.version);
+  }
 
   /**
    * Get all subjects
@@ -526,5 +534,13 @@ export class CompetencyService {
   }
 }
 
-// Export singleton
+/**
+ * Factory function to get a version-aware competency service
+ * @param version - Curriculum version (e.g., "2019", "2024")
+ */
+export function getCompetencyService(version?: string): CompetencyService {
+  return new CompetencyService(version);
+}
+
+// Default singleton for backward compatibility
 export const competencyService = new CompetencyService();

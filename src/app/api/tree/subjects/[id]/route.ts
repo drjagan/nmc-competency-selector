@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { competencyService } from "@/services/competencyService";
+import { getCompetencyService } from "@/services/competencyService";
 
 export async function GET(
   request: NextRequest,
@@ -7,6 +7,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const version = searchParams.get("version") || undefined;
+
     const subjectId = parseInt(id, 10);
 
     if (isNaN(subjectId)) {
@@ -16,7 +19,8 @@ export async function GET(
       );
     }
 
-    const topics = competencyService.getTopicsWithCounts(subjectId);
+    const service = getCompetencyService(version);
+    const topics = service.getTopicsWithCounts(subjectId);
 
     return NextResponse.json({
       subjectId,

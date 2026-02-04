@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { competencyService } from "@/services/competencyService";
+import { getCompetencyService } from "@/services/competencyService";
 
 // GET /api/competencies - Get competency by code
 export async function GET(request: Request) {
@@ -7,17 +7,20 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get("code");
     const codes = searchParams.get("codes");
+    const version = searchParams.get("version") || undefined;
+
+    const service = getCompetencyService(version);
 
     if (codes) {
       // Get multiple by codes
       const codeList = codes.split(",").map((c) => c.trim());
-      const competencies = competencyService.getByCodes(codeList);
+      const competencies = service.getByCodes(codeList);
       return NextResponse.json(competencies);
     }
 
     if (code) {
       // Get single by code
-      const competency = competencyService.getByCode(code);
+      const competency = service.getByCode(code);
       if (!competency) {
         return NextResponse.json(
           { error: "Competency not found" },

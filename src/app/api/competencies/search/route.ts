@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { searchService } from "@/services/searchService";
+import { getSearchService } from "@/services/searchService";
 import type { CompetencyFilters } from "@/types";
 
 export async function POST(request: Request) {
@@ -9,10 +9,12 @@ export async function POST(request: Request) {
       query,
       filters,
       limit = 50,
+      version,
     }: {
       query: string;
       filters?: CompetencyFilters;
       limit?: number;
+      version?: string;
     } = body;
 
     if (!query || query.length < 2) {
@@ -22,7 +24,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const results = searchService.search(query, filters, limit);
+    const service = getSearchService(version);
+    const results = service.search(query, filters, limit);
     return NextResponse.json(results);
   } catch (error) {
     console.error("Search error:", error);
@@ -38,6 +41,7 @@ export async function GET(request: Request) {
     const domain = searchParams.get("domain");
     const coreOnly = searchParams.get("coreOnly") === "true";
     const limit = parseInt(searchParams.get("limit") || "50");
+    const version = searchParams.get("version") || undefined;
 
     if (!query || query.length < 2) {
       return NextResponse.json(
@@ -51,7 +55,8 @@ export async function GET(request: Request) {
     if (domain) filters.domain = domain;
     if (coreOnly) filters.coreOnly = true;
 
-    const results = searchService.search(query, filters, limit);
+    const service = getSearchService(version);
+    const results = service.search(query, filters, limit);
     return NextResponse.json(results);
   } catch (error) {
     console.error("Search error:", error);

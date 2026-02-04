@@ -3,6 +3,10 @@
 import { useState, useCallback, useEffect } from "react";
 import type { Subject, Topic, CompetencyWithDetails } from "@/types";
 
+interface UseCompetencyBrowseOptions {
+  version?: string;
+}
+
 interface UseCompetencyBrowseReturn {
   subjects: Subject[];
   topics: Topic[];
@@ -17,7 +21,11 @@ interface UseCompetencyBrowseReturn {
   error: Error | null;
 }
 
-export function useCompetencyBrowse(): UseCompetencyBrowseReturn {
+export function useCompetencyBrowse(
+  options: UseCompetencyBrowseOptions = {}
+): UseCompetencyBrowseReturn {
+  const { version } = options;
+
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [competencies, setCompetencies] = useState<CompetencyWithDetails[]>([]);
@@ -28,15 +36,30 @@ export function useCompetencyBrowse(): UseCompetencyBrowseReturn {
   const [isLoadingCompetencies, setIsLoadingCompetencies] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Load subjects on mount
+  // Build URL with optional version parameter
+  const buildUrl = useCallback(
+    (baseUrl: string) => {
+      if (!version) return baseUrl;
+      const separator = baseUrl.includes("?") ? "&" : "?";
+      return `${baseUrl}${separator}version=${version}`;
+    },
+    [version]
+  );
+
+  // Load subjects on mount or when version changes
   useEffect(() => {
     const loadSubjects = async () => {
       setIsLoadingSubjects(true);
       try {
-        const response = await fetch("/api/subjects");
+        const response = await fetch(buildUrl("/api/subjects"));
         if (!response.ok) throw new Error("Failed to load subjects");
         const data = await response.json();
         setSubjects(data);
+        // Reset selections when version changes
+        setSelectedSubject(null);
+        setSelectedTopic(null);
+        setTopics([]);
+        setCompetencies([]);
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Failed to load subjects"));
       } finally {
@@ -45,7 +68,7 @@ export function useCompetencyBrowse(): UseCompetencyBrowseReturn {
     };
 
     loadSubjects();
-  }, []);
+  }, [buildUrl]);
 
   // Load topics when subject changes
   useEffect(() => {
@@ -59,7 +82,9 @@ export function useCompetencyBrowse(): UseCompetencyBrowseReturn {
     const loadTopics = async () => {
       setIsLoadingTopics(true);
       try {
-        const response = await fetch(`/api/subjects/${selectedSubject}/topics`);
+        const response = await fetch(
+          buildUrl(`/api/subjects/${selectedSubject}/topics`)
+        );
         if (!response.ok) throw new Error("Failed to load topics");
         const data = await response.json();
         setTopics(data);
@@ -73,7 +98,7 @@ export function useCompetencyBrowse(): UseCompetencyBrowseReturn {
     };
 
     loadTopics();
-  }, [selectedSubject]);
+  }, [selectedSubject, buildUrl]);
 
   // Load competencies when topic changes
   useEffect(() => {
@@ -85,7 +110,9 @@ export function useCompetencyBrowse(): UseCompetencyBrowseReturn {
     const loadCompetencies = async () => {
       setIsLoadingCompetencies(true);
       try {
-        const response = await fetch(`/api/topics/${selectedTopic}/competencies`);
+        const response = await fetch(
+          buildUrl(`/api/topics/${selectedTopic}/competencies`)
+        );
         if (!response.ok) throw new Error("Failed to load competencies");
         const data = await response.json();
         setCompetencies(data);
@@ -97,7 +124,7 @@ export function useCompetencyBrowse(): UseCompetencyBrowseReturn {
     };
 
     loadCompetencies();
-  }, [selectedTopic]);
+  }, [selectedTopic, buildUrl]);
 
   const selectSubject = useCallback((subjectId: number | null) => {
     setSelectedSubject(subjectId);

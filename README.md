@@ -6,6 +6,8 @@ A standalone React component library for selecting medical competencies from Ind
 
 - **Fast Full-Text Search**: FTS5-powered search across ~3,000 competencies (<100ms)
 - **Browse Interface**: Cascading Subject → Topic → Competency navigation
+- **Tree View**: Interactive D3.js tree graph for visual exploration
+- **Curriculum Versioning**: Support for multiple NMC curriculum versions (2019, 2024)
 - **Search Button & Enter Key**: Submit search explicitly or auto-search while typing
 - **Persistent Results**: Search results stay visible for easy multi-select
 - **Tag Display**: Selected competencies shown as removable tags
@@ -52,6 +54,8 @@ function App() {
 | `maxTags` | `number` | - | Maximum tags allowed |
 | `filters` | `CompetencyFilters` | - | Filter by subject/domain |
 | `className` | `string` | - | Container class |
+| `version` | `string` | - | Curriculum version (e.g., "2019", "2024") |
+| `onVersionChange` | `(version: string) => void` | - | Version change handler |
 
 ## CompetencyTag Type
 
@@ -109,6 +113,19 @@ The component uses SQLite with the following structure:
 - **competencies_fts**: FTS5 virtual table for search
 
 ## Changelog
+
+### v1.2.0
+- **Curriculum Versioning**: Support for multiple NMC curriculum versions (2019, 2024)
+- Version selector UI (hidden when only one version active)
+- Separate database files per curriculum version
+- All API endpoints support `?version=` parameter
+- New props: `version`, `onVersionChange`
+
+### v1.1.0
+- Interactive D3.js tree graph viewer for competency exploration
+- Expand/collapse nodes, pan/zoom controls
+- Multi-select support from tree view
+- Three-tab interface: Search | Browse | Tree View
 
 ### v1.0.0
 - Initial release

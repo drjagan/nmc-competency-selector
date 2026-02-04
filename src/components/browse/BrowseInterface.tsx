@@ -12,6 +12,7 @@ interface BrowseInterfaceProps {
   onSelect: (tag: CompetencyTag) => void;
   selectedCodes?: string[];
   maxHeight?: number;
+  version?: string;
 }
 
 export function BrowseInterface({
@@ -19,6 +20,7 @@ export function BrowseInterface({
   onSelect,
   selectedCodes = [],
   maxHeight = 400,
+  version,
 }: BrowseInterfaceProps) {
   const {
     subjects,
@@ -32,7 +34,7 @@ export function BrowseInterface({
     isLoadingTopics,
     isLoadingCompetencies,
     error,
-  } = useCompetencyBrowse();
+  } = useCompetencyBrowse({ version });
 
   // Filter subjects if filterBySubject is provided
   const filteredSubjects = filters?.subject

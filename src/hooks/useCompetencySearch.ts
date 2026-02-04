@@ -9,6 +9,7 @@ interface UseCompetencySearchOptions {
   debounceMs?: number;
   minQueryLength?: number;
   enabled?: boolean;
+  version?: string;
 }
 
 interface UseCompetencySearchReturn {
@@ -29,6 +30,7 @@ export function useCompetencySearch(
     debounceMs = 300,
     minQueryLength = 2,
     enabled = true,
+    version,
   } = options;
 
   const [query, setQuery] = useState("");
@@ -61,6 +63,7 @@ export function useCompetencySearch(
             query: debouncedQuery,
             filters,
             limit: 50,
+            version,
           }),
         });
 
@@ -83,7 +86,7 @@ export function useCompetencySearch(
     };
 
     performSearch();
-  }, [debouncedQuery, filters, minQueryLength, enabled]);
+  }, [debouncedQuery, filters, minQueryLength, enabled, version]);
 
   const search = useCallback((newQuery: string) => {
     setQuery(newQuery);

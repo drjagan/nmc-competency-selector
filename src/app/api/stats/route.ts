@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
-import { competencyService } from "@/services/competencyService";
+import { getCompetencyService } from "@/services/competencyService";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const stats = competencyService.getStats();
+    const { searchParams } = new URL(request.url);
+    const version = searchParams.get("version") || undefined;
+
+    const service = getCompetencyService(version);
+    const stats = service.getStats();
     return NextResponse.json(stats);
   } catch (error) {
     console.error("Error fetching stats:", error);

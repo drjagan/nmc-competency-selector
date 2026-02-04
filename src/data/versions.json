@@ -1,0 +1,25 @@
+{
+  "versions": [
+    {
+      "id": "2019",
+      "name": "CBME Curriculum 2019",
+      "dbFile": "competencies-2019.db",
+      "isDefault": true,
+      "isActive": true,
+      "releasedAt": "2019-01-01",
+      "competencyCount": 2920,
+      "description": "Original NMC Competency Based Medical Education curriculum"
+    },
+    {
+      "id": "2024",
+      "name": "CBME Curriculum 2024",
+      "dbFile": "competencies-2024.db",
+      "isDefault": false,
+      "isActive": false,
+      "releasedAt": "2024-01-01",
+      "competencyCount": null,
+      "description": "Revised NMC Guidelines for CBME Curriculum 2024 (data import pending)"
+    }
+  ],
+  "defaultVersion": "2019"
+}
