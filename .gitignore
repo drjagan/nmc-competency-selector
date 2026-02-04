@@ -15,11 +15,11 @@ dist/
 # Production
 *.tsbuildinfo
 
-# Database
-*.db
+# Database (exclude WAL files, but include the main DB files in src/data/)
 *.db-shm
 *.db-wal
-!src/data/.gitkeep
+# Allow database files in src/data/ for deployment
+!src/data/*.db
 
 # Misc
 .DS_Store
