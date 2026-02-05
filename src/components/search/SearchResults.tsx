@@ -44,8 +44,8 @@ export function SearchResults({
   };
 
   const containerClass = persistent
-    ? "mt-4 w-full rounded-md border bg-popover shadow-md"
-    : "absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md";
+    ? "mt-4 w-full rounded-md border bg-popover shadow-md overflow-hidden"
+    : "absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md overflow-hidden";
 
   if (error) {
     return (
@@ -134,7 +134,7 @@ export function SearchResults({
                       </p>
                       <div className="mt-1 flex flex-wrap gap-1 text-xs text-muted-foreground">
                         <span className="rounded bg-muted px-1.5 py-0.5">{comp.domain}</span>
-                        <span className="rounded bg-muted px-1.5 py-0.5">{comp.topic_name}</span>
+                        <span className="rounded bg-muted px-1.5 py-0.5 truncate max-w-[200px]">{comp.topic_name}</span>
                       </div>
                     </button>
                   );
