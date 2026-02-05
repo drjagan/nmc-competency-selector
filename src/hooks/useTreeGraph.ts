@@ -301,8 +301,11 @@ export function useTreeGraph(options: UseTreeGraphOptions = {}) {
     []
   );
 
-  const resetView = useCallback(() => {
-    dispatch({ type: "SET_TRANSFORM", transform: { x: 100, y: 300, k: 1 } });
+  const resetView = useCallback((width?: number, height?: number) => {
+    // Calculate center position dynamically based on viewport dimensions
+    const centerX = width ? Math.round(width / 3) : 100;  // Start tree 1/3 from left
+    const centerY = height ? Math.round(height / 2) : 300; // Vertically center
+    dispatch({ type: "SET_TRANSFORM", transform: { x: centerX, y: centerY, k: 1 } });
   }, []);
 
   return {

@@ -52,7 +52,7 @@ export function TreeGraphViewer({
       if (entry) {
         setDimensions({
           width: entry.contentRect.width,
-          height,
+          height: isFullscreen ? entry.contentRect.height : height,
         });
       }
     });
@@ -80,18 +80,29 @@ export function TreeGraphViewer({
       const isNowFullscreen = !!document.fullscreenElement;
       setIsFullscreen(isNowFullscreen);
 
-      // Update dimensions for fullscreen
+      // Update dimensions for fullscreen and re-center the tree
       if (isNowFullscreen && containerRef.current) {
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight;
         setDimensions({
-          width: window.innerWidth,
-          height: window.innerHeight,
+          width: newWidth,
+          height: newHeight,
         });
+        // Re-center the tree with a small delay to ensure dimensions are applied
+        setTimeout(() => {
+          resetView(newWidth, newHeight);
+        }, 50);
+      } else if (!isNowFullscreen) {
+        // Exiting fullscreen - reset to default centered position
+        setTimeout(() => {
+          resetView();
+        }, 50);
       }
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
+  }, [resetView]);
 
   const handleZoomIn = () => {
     setTransform({
