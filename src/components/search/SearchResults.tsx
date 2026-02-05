@@ -44,8 +44,8 @@ export function SearchResults({
   };
 
   const containerClass = persistent
-    ? "mt-4 w-full rounded-md border bg-popover shadow-md overflow-hidden"
-    : "absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md overflow-hidden";
+    ? "mt-4 w-full max-w-full rounded-md border bg-popover shadow-md overflow-hidden"
+    : "absolute left-0 right-0 z-50 mt-1 rounded-md border bg-popover shadow-md overflow-hidden";
 
   if (error) {
     return (
@@ -108,7 +108,7 @@ export function SearchResults({
                       onClick={() => handleSelect(comp)}
                       disabled={isSelected}
                       className={cn(
-                        "w-full px-3 py-2 text-left text-sm transition-colors",
+                        "w-full px-3 py-2 text-left text-sm transition-colors overflow-hidden",
                         "hover:bg-accent hover:text-accent-foreground",
                         "focus:bg-accent focus:text-accent-foreground focus:outline-none",
                         isSelected && "opacity-50 cursor-not-allowed"
