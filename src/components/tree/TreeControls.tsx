@@ -1,6 +1,6 @@
 "use client";
 
-import { ZoomIn, ZoomOut, RotateCcw, Maximize2 } from "lucide-react";
+import { ZoomIn, ZoomOut, RotateCcw, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TreeControlsProps {
@@ -8,6 +8,8 @@ interface TreeControlsProps {
   onZoomOut: () => void;
   onReset: () => void;
   onFitToScreen?: () => void;
+  onFullscreenToggle?: () => void;
+  isFullscreen?: boolean;
 }
 
 export function TreeControls({
@@ -15,6 +17,8 @@ export function TreeControls({
   onZoomOut,
   onReset,
   onFitToScreen,
+  onFullscreenToggle,
+  isFullscreen,
 }: TreeControlsProps) {
   return (
     <div className="absolute top-4 right-4 flex flex-col gap-1 z-10">
@@ -54,6 +58,21 @@ export function TreeControls({
           className="bg-background/80 backdrop-blur-sm"
         >
           <Maximize2 className="h-4 w-4" />
+        </Button>
+      )}
+      {onFullscreenToggle && (
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={onFullscreenToggle}
+          title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+          className="bg-background/80 backdrop-blur-sm"
+        >
+          {isFullscreen ? (
+            <Minimize2 className="h-4 w-4" />
+          ) : (
+            <Maximize2 className="h-4 w-4" />
+          )}
         </Button>
       )}
     </div>

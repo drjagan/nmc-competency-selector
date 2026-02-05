@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { useTreeGraph } from "@/hooks/useTreeGraph";
 import { TreeCanvas } from "./TreeCanvas";
@@ -27,6 +27,7 @@ export function TreeGraphViewer({
 }: TreeGraphViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height });
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const {
     treeData,
@@ -58,7 +59,39 @@ export function TreeGraphViewer({
 
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
-  }, [height]);
+  }, [height, isFullscreen]);
+
+  // Fullscreen toggle handler
+  const handleFullscreenToggle = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await containerRef.current?.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (error) {
+      console.error("Fullscreen error:", error);
+    }
+  }, []);
+
+  // Listen for fullscreen changes (including ESC key exit)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isNowFullscreen = !!document.fullscreenElement;
+      setIsFullscreen(isNowFullscreen);
+
+      // Update dimensions for fullscreen
+      if (isNowFullscreen && containerRef.current) {
+        setDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
 
   const handleZoomIn = () => {
     setTransform({
@@ -113,15 +146,18 @@ export function TreeGraphViewer({
     <div
       ref={containerRef}
       className={cn(
-        "relative border rounded-lg overflow-hidden bg-background",
+        "relative overflow-hidden bg-background",
+        isFullscreen ? "rounded-none border-none" : "border rounded-lg",
         className
       )}
-      style={{ height }}
+      style={{ height: isFullscreen ? "100vh" : height }}
     >
       <TreeControls
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onReset={resetView}
+        onFullscreenToggle={handleFullscreenToggle}
+        isFullscreen={isFullscreen}
       />
 
       <TreeCanvas

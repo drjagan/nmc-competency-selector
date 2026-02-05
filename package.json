@@ -1,6 +1,6 @@
 {
   "name": "@academe/nmc-competency-selector",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Standalone React component for selecting NMC medical competencies",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
