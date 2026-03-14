@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import type { Subject, Topic, CompetencyWithDetails } from "@/types";
+import type { Subject, Topic, CompetencyWithDetails, CompetencyFilters } from "@/types";
 
 interface UseCompetencyBrowseOptions {
   version?: string;
+  filters?: CompetencyFilters;
 }
 
 interface UseCompetencyBrowseReturn {
@@ -24,7 +25,7 @@ interface UseCompetencyBrowseReturn {
 export function useCompetencyBrowse(
   options: UseCompetencyBrowseOptions = {}
 ): UseCompetencyBrowseReturn {
-  const { version } = options;
+  const { version, filters } = options;
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -36,12 +37,18 @@ export function useCompetencyBrowse(
   const [isLoadingCompetencies, setIsLoadingCompetencies] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Build URL with optional version parameter
+  // Build URL with optional version and extra parameters
   const buildUrl = useCallback(
-    (baseUrl: string) => {
-      if (!version) return baseUrl;
-      const separator = baseUrl.includes("?") ? "&" : "?";
-      return `${baseUrl}${separator}version=${version}`;
+    (baseUrl: string, extraParams?: Record<string, string>) => {
+      const params = new URLSearchParams();
+      if (version) params.set("version", version);
+      if (extraParams) {
+        for (const [key, value] of Object.entries(extraParams)) {
+          params.set(key, value);
+        }
+      }
+      const qs = params.toString();
+      return qs ? `${baseUrl}?${qs}` : baseUrl;
     },
     [version]
   );
@@ -100,7 +107,7 @@ export function useCompetencyBrowse(
     loadTopics();
   }, [selectedSubject, buildUrl]);
 
-  // Load competencies when topic changes
+  // Load competencies when topic or filters change
   useEffect(() => {
     if (!selectedTopic) {
       setCompetencies([]);
@@ -110,8 +117,18 @@ export function useCompetencyBrowse(
     const loadCompetencies = async () => {
       setIsLoadingCompetencies(true);
       try {
+        const filterParams: Record<string, string> = {};
+        if (filters?.domain) {
+          const domains = Array.isArray(filters.domain) ? filters.domain : [filters.domain];
+          filterParams.domain = domains.join(",");
+        }
+        if (filters?.level) filterParams.level = filters.level.join(",");
+        if (filters?.coreOnly) filterParams.coreOnly = "true";
+        if (filters?.teachingMethod) filterParams.teachingMethod = filters.teachingMethod.join(",");
+        if (filters?.assessmentMethod) filterParams.assessmentMethod = filters.assessmentMethod.join(",");
+
         const response = await fetch(
-          buildUrl(`/api/topics/${selectedTopic}/competencies`)
+          buildUrl(`/api/topics/${selectedTopic}/competencies`, filterParams)
         );
         if (!response.ok) throw new Error("Failed to load competencies");
         const data = await response.json();
@@ -124,7 +141,7 @@ export function useCompetencyBrowse(
     };
 
     loadCompetencies();
-  }, [selectedTopic, buildUrl]);
+  }, [selectedTopic, buildUrl, filters]);
 
   const selectSubject = useCallback((subjectId: number | null) => {
     setSelectedSubject(subjectId);

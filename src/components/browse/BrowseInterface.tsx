@@ -2,9 +2,11 @@
 
 import { Loader2 } from "lucide-react";
 import { useCompetencyBrowse } from "@/hooks/useCompetencyBrowse";
+import { useCompetencyFilters } from "@/hooks/useCompetencyFilters";
 import { SubjectDropdown } from "./SubjectDropdown";
 import { TopicDropdown } from "./TopicDropdown";
 import { CompetencyList } from "./CompetencyList";
+import { FilterPanel } from "@/components/filters/FilterPanel";
 import type { CompetencyFilters, CompetencyTag, CompetencyWithDetails } from "@/types";
 
 interface BrowseInterfaceProps {
@@ -23,6 +25,17 @@ export function BrowseInterface({
   version,
 }: BrowseInterfaceProps) {
   const {
+    filters: activeFilters,
+    setDomains,
+    setLevels,
+    setCoreOnly,
+    setTeachingMethods,
+    setAssessmentMethods,
+    clearAll: clearFilters,
+    activeFilterCount,
+  } = useCompetencyFilters();
+
+  const {
     subjects,
     topics,
     competencies,
@@ -34,7 +47,7 @@ export function BrowseInterface({
     isLoadingTopics,
     isLoadingCompetencies,
     error,
-  } = useCompetencyBrowse({ version });
+  } = useCompetencyBrowse({ version, filters: activeFilters });
 
   // Filter subjects if filterBySubject is provided
   const filteredSubjects = filters?.subject
@@ -90,6 +103,25 @@ export function BrowseInterface({
           onSelect={selectTopic}
           disabled={isLoadingTopics}
           isLoading={isLoadingTopics}
+        />
+      )}
+
+      {/* Filter Panel - show when a topic is selected */}
+      {selectedTopic && (
+        <FilterPanel
+          domains={activeFilters.domain ? (Array.isArray(activeFilters.domain) ? activeFilters.domain : [activeFilters.domain]) : []}
+          levels={activeFilters.level || []}
+          coreOnly={activeFilters.coreOnly || false}
+          teachingMethods={activeFilters.teachingMethod || []}
+          assessmentMethods={activeFilters.assessmentMethod || []}
+          onDomainsChange={setDomains}
+          onLevelsChange={setLevels}
+          onCoreOnlyChange={setCoreOnly}
+          onTeachingMethodsChange={setTeachingMethods}
+          onAssessmentMethodsChange={setAssessmentMethods}
+          onClearAll={clearFilters}
+          activeFilterCount={activeFilterCount}
+          version={version}
         />
       )}
 
