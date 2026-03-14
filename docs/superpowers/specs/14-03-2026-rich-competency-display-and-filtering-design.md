@@ -95,12 +95,13 @@ Color-coded inline badges shown on every competency across all views (Search Res
 
 | Field | Style | Colors |
 |-------|-------|--------|
-| Domain K | Filled badge | Blue (bg-blue-100 text-blue-700) |
-| Domain S | Filled badge | Green (bg-green-100 text-green-700) |
-| Domain A | Filled badge | Amber (bg-amber-100 text-amber-700) |
-| Domain C | Filled badge | Purple (bg-purple-100 text-purple-700) |
+| Domain K (Knowledge) | Filled badge | Blue (bg-blue-100 text-blue-700) |
+| Domain S (Skill) | Filled badge | Green (bg-green-100 text-green-700) |
+| Domain A (Attitude) | Filled badge | Amber (bg-amber-100 text-amber-700) |
 | Level | Outline badge | Gray outline |
 | Core | Filled primary badge | Primary color (existing) |
+
+Note: Domain values in the data are K, S, A and combinations (K/S, K/S/A, K/A, S/A). There is no standalone "C" domain — core status is tracked via the separate `is_core` boolean field and displayed as its own badge.
 
 Multi-domain values (e.g., K/S) display as multiple individual domain badges.
 
@@ -146,10 +147,10 @@ Update `CompetencyTooltip` to show all fields:
 
 ### Filter Panel
 
-New collapsible filter bar above competency lists in Browse and Search views.
+New collapsible filter bar above competency lists in Browse and Search views. No filtering in Tree View (out of scope — tree is a visualization tool, not a search tool).
 
 **Controls:**
-- **Domain** — multi-select checkboxes: K, S, A, C. OR logic (any selected domain matches)
+- **Domain** — multi-select checkboxes: K, S, A. OR logic (any selected domain matches)
 - **Level** — multi-select checkboxes: K, KH, SH, P. OR logic
 - **Core only** — toggle switch (existing, move into filter panel)
 - **Teaching Method** — multi-select dropdown, populated dynamically from DB. AND logic (all selected methods must be present)
@@ -165,14 +166,28 @@ New collapsible filter bar above competency lists in Browse and Search views.
 
 ### API Changes
 
-Extend existing endpoints to accept new query parameters:
+Extend existing endpoints to accept new filter parameters:
 
-**`/api/competencies?version=2024`** — add:
+**`/api/topics/[id]/competencies?version=2024`** (used by Browse flow) — add:
+- `domain` — comma-separated domain values (OR match using LIKE, see SQL below)
 - `level` — comma-separated level values (OR match)
+- `coreOnly` — boolean
 - `teachingMethod` — comma-separated method names (AND match, uses SQL LIKE)
 - `assessmentMethod` — comma-separated method names (AND match, uses SQL LIKE)
 
-**`/api/competencies/search?q=...&version=2024`** — same additional params
+**`/api/competencies/search`** (used by Search flow via POST) — extend the `filters` body parameter to include the new fields. The `useCompetencySearch` hook sends filters via POST body, so the POST handler's `filters` object must be extended to accept `level`, `teachingMethod`, and `assessmentMethod`.
+
+**`GET /api/competencies/methods?version=2024&type=teaching`** — new endpoint to return distinct canonical method values for populating dropdowns:
+- Query param `type`: `teaching` or `assessment`
+- Response: `{ methods: string[] }` — sorted list of distinct canonical values
+- Sources from the normalized comma-separated values in the DB, split and deduplicated
+
+**SQL approach for domain filtering (OR logic with multi-domain values):**
+```sql
+-- Example: user selects domain K and S
+-- Must match competencies with domain K, S, K/S, K/S/A, K/A, S/A, etc.
+WHERE (domain LIKE '%K%' OR domain LIKE '%S%')
+```
 
 **SQL approach for method matching (AND logic):**
 ```sql
@@ -181,26 +196,43 @@ WHERE assessment_methods LIKE '%Viva voce%'
   AND assessment_methods LIKE '%Logbook%'
 ```
 
+### Type Changes
+
+Extend `CompetencyFilters` in `src/types/index.ts`:
+```typescript
+export interface CompetencyFilters {
+  subject?: string | string[];
+  topic?: string;
+  domain?: string | string[];
+  level?: string[];           // NEW: e.g., ["K", "KH"]
+  coreOnly?: boolean;
+  searchQuery?: string;
+  teachingMethod?: string[];  // NEW: e.g., ["LGT", "DOAP"]
+  assessmentMethod?: string[]; // NEW: e.g., ["Viva voce", "Written"]
+}
+```
+
 ### New Components
 
 - `src/components/filters/FilterPanel.tsx` — collapsible filter bar
 - `src/components/filters/MethodSelect.tsx` — multi-select dropdown for teaching/assessment methods
 - `src/hooks/useCompetencyFilters.ts` — filter state management hook
-- New API route or extension: endpoint to return distinct method values for populating dropdowns
+- `src/app/api/competencies/methods/route.ts` — new endpoint for distinct method values
 
 ### Files Modified
 
 - `src/components/browse/BrowseInterface.tsx` — integrate FilterPanel
 - `src/components/search/SearchInterface.tsx` — integrate FilterPanel
-- `src/app/api/competencies/route.ts` — add filter params
-- `src/app/api/competencies/search/route.ts` — add filter params
-- `src/types/index.ts` — extend CompetencyFilters type
-- `src/hooks/useCompetencyBrowse.ts` — pass filters to API
-- `src/hooks/useCompetencySearch.ts` — pass filters to API
+- `src/app/api/topics/[id]/competencies/route.ts` — add filter params to GET handler
+- `src/app/api/competencies/search/route.ts` — extend POST handler's filters object
+- `src/types/index.ts` — extend CompetencyFilters type (see above)
+- `src/hooks/useCompetencyBrowse.ts` — accept `filters?: CompetencyFilters` in options, append filter params as query string to `/api/topics/[id]/competencies` call, re-fetch when filters change
+- `src/hooks/useCompetencySearch.ts` — pass extended filters in POST body (already accepts filters, just needs to forward the new fields)
 
 ## Out of Scope
 
 - No changes to Tree View layout/visualization (only badge rendering within existing nodes)
+- No filtering in Tree View (tree is a visualization tool, not a search/filter interface)
 - No cleanup of 2019 database (can be done later with the same scripts)
 - No changes to admin or import flows
 - No Tagify integration (staying with custom React tag system)
@@ -212,6 +244,7 @@ WHERE assessment_methods LIKE '%Viva voce%'
 
 ## Execution Order
 
-1. Data cleanup (workstream 1) — must complete before display/filtering work
-2. Rich display (workstream 2) — can start once data is clean
-3. Filtering (workstream 3) — can be built in parallel with display, shares some components
+1. **Data cleanup** (workstream 1) — must complete before display/filtering work
+2. **Shared components** — build `CompetencyBadges` and `CompetencyDetails` first as prerequisites for both workstreams 2 and 3
+3. **Rich display** (workstream 2) — integrate shared components into all views
+4. **Filtering** (workstream 3) — build filter panel, API extensions, hook updates. Can proceed in parallel with step 3 after shared components are ready
