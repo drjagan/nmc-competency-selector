@@ -139,7 +139,6 @@ const teachingMap: Record<string, string> = {
   'fap clinical posting': 'FAP Clinical posting', 'fapclinicalposting': 'FAP Clinical posting',
   'lgt fap clinical posting': 'LGT, FAP Clinical posting',
   'sgt fap clinical posting': 'SGT, FAP Clinical posting',
-  'doap fap clinical posting': 'DOAP, FAP Clinical posting',
   // Standardized patients
   'standardized patients': 'Standardized patients', 'standardizedpatients': 'Standardized patients',
   // Direct observation
