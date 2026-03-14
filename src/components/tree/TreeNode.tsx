@@ -2,6 +2,7 @@
 
 import { Plus, Minus, Loader2, Check } from "lucide-react";
 import type { TreeNode as TreeNodeType } from "@/types/tree";
+import type { CompetencyWithDetails } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface TreeNodeProps {
@@ -18,6 +19,12 @@ const nodeStyles = {
   subject: { fill: "hsl(var(--primary))", radius: 18, textColor: "hsl(var(--primary-foreground))" },
   topic: { fill: "hsl(var(--secondary))", radius: 14, textColor: "hsl(var(--secondary-foreground))" },
   competency: { fill: "hsl(var(--muted))", radius: 10, textColor: "hsl(var(--muted-foreground))" },
+};
+
+const DOMAIN_SVG_COLORS: Record<string, string> = {
+  K: "hsl(217, 91%, 60%)",  // blue
+  S: "hsl(142, 71%, 45%)",  // green
+  A: "hsl(38, 92%, 50%)",   // amber
 };
 
 function truncateText(text: string, maxLength: number): string {
@@ -37,6 +44,11 @@ export function TreeNode({
   const isLeaf = node.type === "competency";
   const hasChildren = node.children && node.children.length > 0;
   const canExpand = !isLeaf && (hasChildren || node.childCount && node.childCount > 0);
+
+  // Extract domain from competency node data
+  const competencyDomain = isLeaf && node.data && "domain" in node.data
+    ? (node.data as CompetencyWithDetails).domain
+    : undefined;
 
   // Determine fill color for competency nodes
   const fillColor = node.type === "competency" && isSelected
@@ -179,6 +191,26 @@ export function TreeNode({
           </tspan>
         )}
       </text>
+
+      {/* Domain indicator dots for competency nodes */}
+      {competencyDomain && (
+        <g transform={`translate(${style.radius + 28}, 8)`}>
+          {competencyDomain.split("/").map((d: string, i: number) => {
+            const color = DOMAIN_SVG_COLORS[d.trim()];
+            if (!color) return null;
+            return (
+              <circle
+                key={d}
+                cx={i * 10}
+                cy={0}
+                r={3}
+                fill={color}
+                className="pointer-events-none"
+              />
+            );
+          })}
+        </g>
+      )}
     </g>
   );
 }
