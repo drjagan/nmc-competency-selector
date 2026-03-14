@@ -500,6 +500,27 @@ export class CompetencyService {
   }
 
   /**
+   * Get distinct canonical values for teaching or assessment methods
+   */
+  getDistinctMethods(type: "teaching" | "assessment"): string[] {
+    const column = type === "teaching" ? "teaching_methods" : "assessment_methods";
+    const rows = this.db
+      .prepare(`SELECT DISTINCT ${column} as methods FROM competencies WHERE ${column} IS NOT NULL AND deleted_at IS NULL`)
+      .all() as { methods: string }[];
+
+    // Split comma-separated values, deduplicate, sort
+    const allMethods = new Set<string>();
+    for (const row of rows) {
+      row.methods.split(",").forEach((m) => {
+        const trimmed = m.trim();
+        if (trimmed) allMethods.add(trimmed);
+      });
+    }
+
+    return Array.from(allMethods).sort();
+  }
+
+  /**
    * Get statistics
    */
   getStats(): {
