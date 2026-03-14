@@ -69,26 +69,29 @@ export class CompetencyService {
   }
 
   /**
-   * Get competencies by topic ID
+   * Get competencies by topic ID, optionally filtered
    */
-  getCompetenciesByTopic(topicId: number): CompetencyWithDetails[] {
-    return this.db
-      .prepare(
-        `
-        SELECT
-          c.*,
-          t.name AS topic_name,
-          s.code AS subject_code,
-          s.name AS subject_name
-        FROM competencies c
-        JOIN topics t ON c.topic_id = t.id
-        JOIN subjects s ON t.subject_id = s.id
-        WHERE c.topic_id = ?
-          AND c.deleted_at IS NULL
-        ORDER BY c.competency_code
-      `
-      )
-      .all(topicId) as CompetencyWithDetails[];
+  getCompetenciesByTopic(topicId: number, filters?: CompetencyFilters): CompetencyWithDetails[] {
+    let sql = `
+      SELECT
+        c.*,
+        t.name AS topic_name,
+        s.code AS subject_code,
+        s.name AS subject_name
+      FROM competencies c
+      JOIN topics t ON c.topic_id = t.id
+      JOIN subjects s ON t.subject_id = s.id
+      WHERE c.topic_id = ?
+        AND c.deleted_at IS NULL
+    `;
+    const params: (string | number)[] = [topicId];
+
+    if (filters) {
+      sql += this.buildFilterClauses(filters, params);
+    }
+
+    sql += ` ORDER BY c.competency_code`;
+    return this.db.prepare(sql).all(...params) as CompetencyWithDetails[];
   }
 
   /**
@@ -208,8 +211,20 @@ export class CompetencyService {
       JOIN subjects s ON t.subject_id = s.id
       WHERE c.deleted_at IS NULL
     `;
-
     const params: (string | number)[] = [];
+
+    sql += this.buildFilterClauses(filters, params);
+    sql += ` ORDER BY s.display_order, t.display_order, c.competency_code`;
+
+    return this.db.prepare(sql).all(...params) as CompetencyWithDetails[];
+  }
+
+  /**
+   * Build SQL WHERE clauses for filter fields
+   * Appends clauses to the provided params array and returns the SQL string
+   */
+  private buildFilterClauses(filters: CompetencyFilters, params: (string | number)[]): string {
+    let sql = "";
 
     if (filters.subject) {
       if (Array.isArray(filters.subject)) {
@@ -226,13 +241,24 @@ export class CompetencyService {
       params.push(filters.topic);
     }
 
+    // Domain: use LIKE to match multi-domain values like K/S, K/S/A
     if (filters.domain) {
-      if (Array.isArray(filters.domain)) {
-        sql += ` AND c.domain IN (${filters.domain.map(() => "?").join(",")})`;
-        params.push(...filters.domain);
-      } else {
-        sql += ` AND c.domain = ?`;
-        params.push(filters.domain);
+      const domains = Array.isArray(filters.domain) ? filters.domain : [filters.domain];
+      if (domains.length > 0) {
+        const domainClauses = domains.map(() => "c.domain LIKE ?");
+        sql += ` AND (${domainClauses.join(" OR ")})`;
+        for (const d of domains) {
+          params.push(`%${d}%`);
+        }
+      }
+    }
+
+    // Level: OR logic
+    if (filters.level && filters.level.length > 0) {
+      const levelClauses = filters.level.map(() => "c.competency_level LIKE ?");
+      sql += ` AND (${levelClauses.join(" OR ")})`;
+      for (const l of filters.level) {
+        params.push(`%${l}%`);
       }
     }
 
@@ -240,9 +266,23 @@ export class CompetencyService {
       sql += ` AND c.is_core = 1`;
     }
 
-    sql += ` ORDER BY s.display_order, t.display_order, c.competency_code`;
+    // Teaching method: AND logic (all selected must be present)
+    if (filters.teachingMethod && filters.teachingMethod.length > 0) {
+      for (const method of filters.teachingMethod) {
+        sql += ` AND c.teaching_methods LIKE ?`;
+        params.push(`%${method}%`);
+      }
+    }
 
-    return this.db.prepare(sql).all(...params) as CompetencyWithDetails[];
+    // Assessment method: AND logic
+    if (filters.assessmentMethod && filters.assessmentMethod.length > 0) {
+      for (const method of filters.assessmentMethod) {
+        sql += ` AND c.assessment_methods LIKE ?`;
+        params.push(`%${method}%`);
+      }
+    }
+
+    return sql;
   }
 
   /**
