@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
+import { CompetencyBadges, MethodPills } from "@/components/competency/CompetencyBadges";
 import type { CompetencyTag } from "@/types";
 
 interface CompetencyTooltipProps {
@@ -30,33 +30,40 @@ export function CompetencyTooltip({ tag, children }: CompetencyTooltipProps) {
               <span className="font-mono font-bold text-primary">
                 {tag.code}
               </span>
-              {tag.isCore && (
-                <Badge variant="default" className="text-xs">
-                  Core
-                </Badge>
-              )}
+              <CompetencyBadges
+                domain={tag.domain}
+                level={tag.level}
+                isCore={tag.isCore}
+                compact
+              />
             </div>
             <div className="text-xs text-muted-foreground">
-              {tag.subjectName} • {tag.topicName}
+              {tag.subjectName} &bull; {tag.topicName}
             </div>
           </div>
 
           {/* Competency Text */}
           <p className="text-sm leading-relaxed">{tag.text}</p>
 
-          {/* Metadata */}
-          <div className="flex flex-wrap gap-2 pt-1">
-            {tag.domain && (
-              <Badge variant="outline" className="text-xs">
-                {tag.domain}
-              </Badge>
-            )}
-            {tag.level && (
-              <Badge variant="outline" className="text-xs">
-                Level {tag.level}
-              </Badge>
-            )}
-          </div>
+          {/* Teaching Methods */}
+          {tag.teachingMethods && (
+            <div className="space-y-1">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                Teaching
+              </span>
+              <MethodPills methods={tag.teachingMethods} type="teaching" />
+            </div>
+          )}
+
+          {/* Assessment Methods */}
+          {tag.assessmentMethods && (
+            <div className="space-y-1">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                Assessment
+              </span>
+              <MethodPills methods={tag.assessmentMethods} type="assessment" />
+            </div>
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
