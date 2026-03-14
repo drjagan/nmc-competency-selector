@@ -11,7 +11,7 @@ const databases: Map<string, Database.Database> = new Map();
  * @returns SQLite database connection
  */
 export function getDatabase(version?: string): Database.Database {
-  const targetVersion = version || getDefaultVersion();
+  const targetVersion = version || process.env.DB_VERSION || getDefaultVersion();
 
   // Validate version exists
   if (!isValidVersion(targetVersion)) {
