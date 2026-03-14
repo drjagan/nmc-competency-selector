@@ -42,6 +42,9 @@ export async function GET(request: Request) {
     const coreOnly = searchParams.get("coreOnly") === "true";
     const limit = parseInt(searchParams.get("limit") || "50");
     const version = searchParams.get("version") || undefined;
+    const level = searchParams.get("level");
+    const teachingMethod = searchParams.get("teachingMethod");
+    const assessmentMethod = searchParams.get("assessmentMethod");
 
     if (!query || query.length < 2) {
       return NextResponse.json(
@@ -54,6 +57,9 @@ export async function GET(request: Request) {
     if (subject) filters.subject = subject;
     if (domain) filters.domain = domain;
     if (coreOnly) filters.coreOnly = true;
+    if (level) filters.level = level.split(",");
+    if (teachingMethod) filters.teachingMethod = teachingMethod.split(",");
+    if (assessmentMethod) filters.assessmentMethod = assessmentMethod.split(",");
 
     const service = getSearchService(version);
     const results = service.search(query, filters, limit);
