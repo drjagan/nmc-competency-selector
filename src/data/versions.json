@@ -4,7 +4,7 @@
       "id": "2019",
       "name": "CBME Curriculum 2019",
       "dbFile": "competencies-2019.db",
-      "isDefault": true,
+      "isDefault": false,
       "isActive": true,
       "releasedAt": "2019-01-01",
       "competencyCount": 2920,
@@ -14,12 +14,12 @@
       "id": "2024",
       "name": "CBME Curriculum 2024",
       "dbFile": "competencies-2024.db",
-      "isDefault": false,
-      "isActive": false,
-      "releasedAt": "2024-01-01",
-      "competencyCount": null,
-      "description": "Revised NMC Guidelines for CBME Curriculum 2024 (data import pending)"
+      "isDefault": true,
+      "isActive": true,
+      "releasedAt": "2024-09-12",
+      "competencyCount": 2623,
+      "description": "Revised NMC Guidelines for CBME Curriculum 2024 (UGMEB, effective from MBBS batch 2024-25)"
     }
   ],
-  "defaultVersion": "2019"
+  "defaultVersion": "2024"
 }

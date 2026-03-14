@@ -94,8 +94,11 @@ export interface CompetencyFilters {
   subject?: string | string[];
   topic?: string;
   domain?: string | string[];
+  level?: string[];
   coreOnly?: boolean;
   searchQuery?: string;
+  teachingMethod?: string[];
+  assessmentMethod?: string[];
 }
 
 // Excel import types

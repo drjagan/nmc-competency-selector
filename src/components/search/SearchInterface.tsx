@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SearchResults } from "./SearchResults";
+import { FilterPanel } from "@/components/filters/FilterPanel";
 import { useCompetencySearch } from "@/hooks/useCompetencySearch";
+import { useCompetencyFilters } from "@/hooks/useCompetencyFilters";
 import type { CompetencyFilters, CompetencyTag } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -30,8 +32,24 @@ export function SearchInterface({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const {
+    filters: activeFilters,
+    setDomains,
+    setLevels,
+    setCoreOnly,
+    setTeachingMethods,
+    setAssessmentMethods,
+    clearAll: clearFilters,
+    activeFilterCount,
+  } = useCompetencyFilters();
+
+  const mergedFilters = useMemo(() => ({
+    ...filters,
+    ...activeFilters,
+  }), [filters, activeFilters]);
+
   const { groupedResults, isLoading, error, search, clear } = useCompetencySearch({
-    filters,
+    filters: mergedFilters,
     version,
   });
 
@@ -107,6 +125,23 @@ export function SearchInterface({
           </Button>
         )}
       </div>
+
+      {/* Filter Panel */}
+      <FilterPanel
+        domains={activeFilters.domain ? (Array.isArray(activeFilters.domain) ? activeFilters.domain : [activeFilters.domain]) : []}
+        levels={activeFilters.level || []}
+        coreOnly={activeFilters.coreOnly || false}
+        teachingMethods={activeFilters.teachingMethod || []}
+        assessmentMethods={activeFilters.assessmentMethod || []}
+        onDomainsChange={setDomains}
+        onLevelsChange={setLevels}
+        onCoreOnlyChange={setCoreOnly}
+        onTeachingMethodsChange={setTeachingMethods}
+        onAssessmentMethodsChange={setAssessmentMethods}
+        onClearAll={clearFilters}
+        activeFilterCount={activeFilterCount}
+        version={version}
+      />
 
       {showResults && (
         <SearchResults

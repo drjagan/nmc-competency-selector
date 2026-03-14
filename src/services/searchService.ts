@@ -86,18 +86,45 @@ export class SearchService {
       }
     }
 
+    // Domain: use LIKE to match multi-domain values (K/S, K/S/A, etc.)
     if (filters?.domain) {
-      if (Array.isArray(filters.domain)) {
-        sql += ` AND c.domain IN (${filters.domain.map(() => "?").join(",")})`;
-        params.push(...filters.domain);
-      } else {
-        sql += ` AND c.domain = ?`;
-        params.push(filters.domain);
+      const domains = Array.isArray(filters.domain) ? filters.domain : [filters.domain];
+      if (domains.length > 0) {
+        const domainClauses = domains.map(() => "c.domain LIKE ?");
+        sql += ` AND (${domainClauses.join(" OR ")})`;
+        for (const d of domains) {
+          params.push(`%${d}%`);
+        }
+      }
+    }
+
+    // Level: OR logic
+    if (filters?.level && filters.level.length > 0) {
+      const levelClauses = filters.level.map(() => "c.competency_level LIKE ?");
+      sql += ` AND (${levelClauses.join(" OR ")})`;
+      for (const l of filters.level) {
+        params.push(`%${l}%`);
       }
     }
 
     if (filters?.coreOnly) {
       sql += ` AND c.is_core = 1`;
+    }
+
+    // Teaching method: AND logic
+    if (filters?.teachingMethod && filters.teachingMethod.length > 0) {
+      for (const method of filters.teachingMethod) {
+        sql += ` AND c.teaching_methods LIKE ?`;
+        params.push(`%${method}%`);
+      }
+    }
+
+    // Assessment method: AND logic
+    if (filters?.assessmentMethod && filters.assessmentMethod.length > 0) {
+      for (const method of filters.assessmentMethod) {
+        sql += ` AND c.assessment_methods LIKE ?`;
+        params.push(`%${method}%`);
+      }
     }
 
     // Order by relevance (FTS5 rank)
